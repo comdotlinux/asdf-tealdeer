@@ -1,11 +1,13 @@
 #!/usr/bin/env bash
 
 set -euo pipefail
+set -x
 
 # TODO: Ensure this is the correct GitHub homepage where releases can be downloaded for tealdeer.
 GH_REPO="https://github.com/dbrgn/tealdeer"
 TOOL_NAME="tealdeer"
-TOOL_TEST="tldr --version"
+TOOL_ALIAS="tldr"
+TOOL_TEST="${TOOL_ALIAS} --version"
 
 fail() {
   echo -e "asdf-$TOOL_NAME: $*"
@@ -40,9 +42,13 @@ download_release() {
   local version filename url
   version="$1"
   filename="$2"
+  toolname="$3"
 
+  local platform=$(uname | tr '[:upper:]' '[:lower:]')
+  local architecture="$(uname -m)"
   # TODO: Adapt the release URL convention for tealdeer
-  url="$GH_REPO/archive/v${version}.tar.gz"
+  # https://github.com/dbrgn/tealdeer/releases/download/v1.6.1/tealdeer-linux-x86_64-musl
+  url="$GH_REPO/releases/download/v${version}/${toolname}-${platform}-${architecture}-musl"
 
   echo "* Downloading $TOOL_NAME release $version..."
   curl "${curl_opts[@]}" -o "$filename" -C - "$url" || fail "Could not download $url"
@@ -59,12 +65,12 @@ install_version() {
 
   (
     mkdir -p "$install_path"
-    cp -r "$ASDF_DOWNLOAD_PATH"/* "$install_path"
-
-    # TODO: Asert tealdeer executable exists.
     local tool_cmd
     tool_cmd="$(echo "$TOOL_TEST" | cut -d' ' -f1)"
-    test -x "$install_path/bin/$tool_cmd" || fail "Expected $install_path/bin/$tool_cmd to be executable."
+    cp -v "$ASDF_DOWNLOAD_PATH"/${TOOL_NAME}-${version} "$install_path/${TOOL_ALIAS}"
+    chmod +x "$install_path/${TOOL_ALIAS}"
+
+    test -x "$install_path/$tool_cmd" || fail "Expected $install_path/$tool_cmd to be executable."
 
     echo "$TOOL_NAME $version installation was successful!"
   ) || (
