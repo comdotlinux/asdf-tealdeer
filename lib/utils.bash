@@ -69,7 +69,8 @@ install_version() {
     tool_cmd="$(echo "$TOOL_TEST" | cut -d' ' -f1)"
     cp -v "$ASDF_DOWNLOAD_PATH"/${TOOL_NAME}-${version} "$install_path/${TOOL_ALIAS}"
     cp -v "$ASDF_DOWNLOAD_PATH"/${TOOL_NAME}-${version} "$install_path/${TOOL_NAME}"
-    chmod +x "$install_path/${TOOL_ALIAS} $install_path/${TOOL_NAME}"
+    chmod +x "$install_path/${TOOL_ALIAS}"
+    chmod +x "$install_path/${TOOL_NAME}"
 
     test -x "$install_path/$tool_cmd" || fail "Expected $install_path/$tool_cmd to be executable."
 
